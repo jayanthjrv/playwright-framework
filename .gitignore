@@ -134,6 +134,7 @@ playwright/.cache/
 
 # Environment configuration files
 config/.env.local
+config/.env.*.local
 config/.local
 # .env.*
 # !.env.example

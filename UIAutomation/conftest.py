@@ -38,6 +38,7 @@ async def browser(request):
         "msedge",
     ], f"Unsupported browser channel: {browser_channel}"
 
+    browser = None
     async with async_playwright() as p:
         browsers = {
             "chromium": p.chromium,
