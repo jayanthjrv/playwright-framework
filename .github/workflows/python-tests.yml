@@ -1,0 +1,68 @@
+name: Run Python Tests
+
+on:
+  pull_request:
+
+jobs:
+  run_tests:
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+      cancel-in-progress: true
+    name: Test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-24.04 ]
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Read Python version
+        id: python-version
+        run: echo "version=$(cat .python-version)" >> $GITHUB_OUTPUT
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ steps.python-version.outputs.version }}
+          cache: 'pip'
+          cache-dependency-path: |
+            pyproject.toml
+            pytest.ini
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e . -r requirements.txt
+
+      - name: Install Playwright browsers
+        run: python -m playwright install chrome --with-deps
+
+      - name: Run smoke tests
+        id: test-run
+        run: python -m pytest -m smoke
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            UIAutomation/test-results/
+            UIAutomation/screenshots/
+          retention-days: 7
+
+    env:
+      LOGIN_URL: ${{ secrets.LOGIN_URL }}
+      LOGIN_USERNAME: ${{ secrets.LOGIN_USERNAME }}
+      LOGIN_PASSWORD: ${{ secrets.LOGIN_PASSWORD }}
+      HEADLESS: ${{ secrets.HEADLESS || 'true' }}

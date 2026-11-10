@@ -1,0 +1,26 @@
+pyyaml
+pynacl
+httpx
+# Core testing framework
+pytest
+pytest-playwright
+
+# Pytest plugins
+pytest-json-report        # for JSON test results
+pytest-xdist              # for parallel execution
+pytest-rerunfailures      # to rerun flaky tests
+
+# Playwright
+playwright
+
+# Additional utilities you appear to be using
+python-dotenv
+pytest-mock
+pytest-order
+pytest-asyncio
+tzlocal
+faker
+requests
+tzlocal
+python-dateutil
+packaging
